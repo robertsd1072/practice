@@ -1,0 +1,546 @@
+<html>	
+	<style type="text/css">
+		div
+		{
+			border-radius: 10px;
+		}
+
+		table
+		{
+			border: 1px solid black;
+			border-collapse: collapse;
+		}
+
+		td
+		{
+			background-color:white;
+			height:100;
+			width:100;
+			border: 0px;
+			border-collapse: collapse;
+			font-size: 20px;
+			position: absolute;
+		}
+
+		.tbl_label_row
+		{
+			border: 1px solid #1e1e1e;
+			background-color:#1e1e1e;
+			height:40;
+			width:100;
+			color: lightgray;
+		}
+
+		.tbl_label_row:hover
+		{
+			background-color:#1e1e1e;
+		}
+
+		.tbl_label_col
+		{
+			border: 1px solid #1e1e1e;
+			background-color:#1e1e1e;
+			height:100;
+			width:40;
+			text-align: right;
+			color: lightgray;
+		}
+
+		.tbl_label_col:hover
+		{
+			background-color:#1e1e1e;
+		}
+
+		.tbl_label_corner
+		{
+			border: 1px solid #1e1e1e;
+			background-color:#1e1e1e;
+			height:40;
+			width:40;
+			opacity: 0;
+		}
+
+		.tbl_label_corner:hover
+		{
+			border: 1px solid #1e1e1e;
+			background-color:#1e1e1e;
+			opacity: 0;
+		}
+
+		.td_light
+		{
+			background-color:#e2d1bd;
+		}
+
+		.td_light:hover
+		{
+			background-color:#e4dacf;
+		}
+
+		.td_dark
+		{
+			background-color:#8476ba;
+		}
+
+		.td_dark:hover
+		{
+			background-color:#9790b6;
+		}
+	</style>
+
+
+	<script>
+		class boardCell
+		{
+			constructor(piece, elem)
+			{
+				this.piece = piece;
+				this.elem = elem;
+			}
+		}
+
+		var board_arr = [];
+
+		var onCellClick = function(cell_id) 
+		{
+			var index_1 =  7 - (parseInt(cell_id.substring(1, 2)) - 1);
+			var col_letter = cell_id.substring(0, 1);
+			var index_2 = -1;
+			if (col_letter == "a")
+				index_2 = 0;
+			else if (col_letter == "b")
+				index_2 = 1;
+			else if (col_letter == "c")
+				index_2 = 2;
+			else if (col_letter == "d")
+				index_2 = 3;
+			else if (col_letter == "e")
+				index_2 = 4;
+			else if (col_letter == "f")
+				index_2 = 5;
+			else if (col_letter == "g")
+				index_2 = 6;
+			else if (col_letter == "h")
+				index_2 = 7;
+
+			//console.log("index_1 = "+index_1);
+			//console.log("index_2 = "+index_2);
+
+			if (board_arr[index_1][index_2].piece == null)
+				console.log(cell_id+" clicked: null");
+			else
+				console.log(cell_id+" clicked: "+board_arr[index_1][index_2].piece.id);
+		}
+
+		var onResizing = function(event)
+		{
+			/*if (window.innerWidth < 600)
+			{
+				window.resizeTo(600,window.innerHeight);
+			}
+
+			if (window.innerHeight < 440)
+			{
+				window.resizeTo(window.innerWidth,440);
+			}*/
+
+			//console.clear();
+
+			//console.log("innerWidth="+window.innerWidth+"   innerHeight="+window.innerHeight);
+
+			var min_length = window.innerHeight < window.innerWidth ? window.innerHeight : window.innerWidth;
+			min_length = min_length - 16;
+
+			//console.log("min_length="+min_length);
+
+			document.getElementById("board").style.width = min_length;
+			document.getElementById("board").style.height = min_length;
+
+			document.getElementById("left_inner").style.height = window.innerHeight - 16;
+			document.getElementById("right_inner").style.height = window.innerHeight - 16;
+
+			var left_over_width = window.innerWidth - 32 - min_length;
+			document.getElementById("left_inner").style.width = (left_over_width / 2);
+			document.getElementById("right_inner").style.width = (left_over_width / 2);
+
+			//console.log("left_inner width = "+document.getElementById("left_inner").style.width);
+
+			document.getElementById("board").style.left = parseFloat(document.getElementById("left_inner").style.width,10) + 16;
+			document.getElementById("board").style.top = 8;
+
+			document.getElementById("right_inner").style.left = parseFloat(document.getElementById("left_inner").style.width,10) + 16 + min_length + 8;
+
+
+			var chess_cel_length = min_length / 8.8;
+			var label_cel_length = (min_length - (chess_cel_length * 8)) / 2;
+
+			for (var i=0; i<10; i++)
+			{
+				for (var j=0; j<10; j++)
+				{
+					if (i > 0 && i < 9 && j > 0 && j < 9)
+					{
+						document.getElementById("board").children[0].children[0].children[i].children[j].style.width = chess_cel_length;
+						document.getElementById("board").children[0].children[0].children[i].children[j].style.height = chess_cel_length;
+
+						document.getElementById("board").children[0].children[0].children[i].children[j].style.left = label_cel_length + ((j-1) * chess_cel_length);
+						document.getElementById("board").children[0].children[0].children[i].children[j].style.top = label_cel_length + ((i-1) * chess_cel_length);
+					}
+					else if ((i == 0 && j == 0) || (i == 0 && j == 9) || (i == 9 && j == 0) || (i == 9 && j == 9))
+					{
+						document.getElementById("board").children[0].children[0].children[i].children[j].style.width = label_cel_length-4;
+						document.getElementById("board").children[0].children[0].children[i].children[j].style.height = label_cel_length-4;
+
+						document.getElementById("board").children[0].children[0].children[i].children[j].style.left 
+							= (j > 0 ? ((j-1) * chess_cel_length) : 0) + (j > 0 ? label_cel_length : 0);
+						document.getElementById("board").children[0].children[0].children[i].children[j].style.top 
+							= (i > 0 ? ((i-1) * chess_cel_length) : 0) + (i > 0 ? label_cel_length : 0);
+					}
+					else if (i == 0 || i == 9)
+					{
+						document.getElementById("board").children[0].children[0].children[i].children[j].style.width = chess_cel_length-4;
+						document.getElementById("board").children[0].children[0].children[i].children[j].style.height = label_cel_length-4;
+
+						document.getElementById("board").children[0].children[0].children[i].children[j].style.left = ((j-1) * chess_cel_length) + (j > 0 ? label_cel_length : 0);
+						document.getElementById("board").children[0].children[0].children[i].children[j].style.top 
+							= (i > 0 ? ((i-1) * chess_cel_length) : 0) + (i > 0 ? label_cel_length : 0);
+					}
+					else if (j == 0 || j == 9)
+					{
+						document.getElementById("board").children[0].children[0].children[i].children[j].style.width = label_cel_length-4;
+						document.getElementById("board").children[0].children[0].children[i].children[j].style.height = chess_cel_length-4;
+
+						document.getElementById("board").children[0].children[0].children[i].children[j].style.left 
+							= (j > 0 ? ((j-1) * chess_cel_length) : 0) + (j > 0 ? label_cel_length : 0);
+						document.getElementById("board").children[0].children[0].children[i].children[j].style.top = ((i-1) * chess_cel_length) + (i > 0 ? label_cel_length : 0);
+					}
+				}
+			}
+
+			var pieces_arr = [document.getElementById("l_r_1")
+							 ,document.getElementById("l_n_1")
+							 ,document.getElementById("l_b_1")
+							 ,document.getElementById("l_q")
+							 ,document.getElementById("l_k")
+							 ,document.getElementById("l_b_2")
+							 ,document.getElementById("l_n_2")
+							 ,document.getElementById("l_r_2")
+							 ,document.getElementById("l_p_1")
+							 ,document.getElementById("l_p_2")
+							 ,document.getElementById("l_p_3")
+							 ,document.getElementById("l_p_4")
+							 ,document.getElementById("l_p_5")
+							 ,document.getElementById("l_p_6")
+							 ,document.getElementById("l_p_7")
+							 ,document.getElementById("l_p_8")
+							 ,document.getElementById("d_r_1")
+							 ,document.getElementById("d_n_1")
+							 ,document.getElementById("d_b_1")
+							 ,document.getElementById("d_q")
+							 ,document.getElementById("d_k")
+							 ,document.getElementById("d_b_2")
+							 ,document.getElementById("d_n_2")
+							 ,document.getElementById("d_r_2")
+							 ,document.getElementById("d_p_1")
+							 ,document.getElementById("d_p_2")
+							 ,document.getElementById("d_p_3")
+							 ,document.getElementById("d_p_4")
+							 ,document.getElementById("d_p_5")
+							 ,document.getElementById("d_p_6")
+							 ,document.getElementById("d_p_7")
+							 ,document.getElementById("d_p_8")];
+
+			for (var i=0; i<32; i++)
+			{
+				pieces_arr[i].style.width = chess_cel_length;
+				pieces_arr[i].style.height = chess_cel_length;
+
+				if (i < 8)
+				{
+					pieces_arr[i].style.left = (left_over_width / 2) + 16 + label_cel_length + ((i % 8) * chess_cel_length);
+					pieces_arr[i].style.top = 8 + label_cel_length + (7 * chess_cel_length);
+				}
+				else if (i < 16)
+				{
+					pieces_arr[i].style.left = (left_over_width / 2) + 16 + label_cel_length + ((i % 8) * chess_cel_length);
+					pieces_arr[i].style.top = 8 + label_cel_length + (6 * chess_cel_length);
+				}
+				else if (i < 24)
+				{
+					pieces_arr[i].style.left = (left_over_width / 2) + 16 + label_cel_length + ((i % 8) * chess_cel_length);
+					pieces_arr[i].style.top = 8 + label_cel_length + (0 * chess_cel_length);
+				}
+				else
+				{
+					pieces_arr[i].style.left = (left_over_width / 2) + 16 + label_cel_length + ((i % 8) * chess_cel_length);
+					pieces_arr[i].style.top = 8 + label_cel_length + (1 * chess_cel_length);
+				}
+			}
+
+			
+		};
+
+		var onLoad = function(event) 
+		{
+			var pieces_arr = [document.getElementById("l_r_1")
+							 ,document.getElementById("l_n_1")
+							 ,document.getElementById("l_b_1")
+							 ,document.getElementById("l_q")
+							 ,document.getElementById("l_k")
+							 ,document.getElementById("l_b_2")
+							 ,document.getElementById("l_n_2")
+							 ,document.getElementById("l_r_2")
+							 ,document.getElementById("l_p_1")
+							 ,document.getElementById("l_p_2")
+							 ,document.getElementById("l_p_3")
+							 ,document.getElementById("l_p_4")
+							 ,document.getElementById("l_p_5")
+							 ,document.getElementById("l_p_6")
+							 ,document.getElementById("l_p_7")
+							 ,document.getElementById("l_p_8")
+							 ,document.getElementById("d_r_1")
+							 ,document.getElementById("d_n_1")
+							 ,document.getElementById("d_b_1")
+							 ,document.getElementById("d_q")
+							 ,document.getElementById("d_k")
+							 ,document.getElementById("d_b_2")
+							 ,document.getElementById("d_n_2")
+							 ,document.getElementById("d_r_2")
+							 ,document.getElementById("d_p_1")
+							 ,document.getElementById("d_p_2")
+							 ,document.getElementById("d_p_3")
+							 ,document.getElementById("d_p_4")
+							 ,document.getElementById("d_p_5")
+							 ,document.getElementById("d_p_6")
+							 ,document.getElementById("d_p_7")
+							 ,document.getElementById("d_p_8")];
+
+			for (var i=1; i<9; i++)
+			{
+				//console.log(document.getElementById("board").children[0].children[0].children[i].id);
+
+				var temp_arr = [];
+
+				for (var j=1; j<9; j++)
+				{
+					//console.log(document.getElementById("board").children[0].children[0].children[i].children[j]);
+
+					if (document.getElementById("board").children[0].children[0].children[i].children[j].classList.contains("td_light") 
+						|| document.getElementById("board").children[0].children[0].children[i].children[j].classList.contains("td_dark"))
+					{
+						if (j > 0 && j < 9 && i == 8)
+						{
+							//console.log("i="+i+",(j-1)="+(j-1)+" and pushing "+pieces_arr[(j-1)].id);
+							temp_arr.push(new boardCell(pieces_arr[(j-1)], document.getElementById("board").children[0].children[0].children[i].children[j]));
+						}
+						else if (j > 0 && j < 9 && i == 7)
+						{
+							//console.log("i="+i+",(j-1)="+(j-1)+" and pushing "+pieces_arr[(j-1) + 8].id);
+							temp_arr.push(new boardCell(pieces_arr[(j-1) + 8], document.getElementById("board").children[0].children[0].children[i].children[j]));
+						}
+						else if (j > 0 && j < 9 && i == 1)
+						{
+							//console.log("i="+i+",(j-1)="+(j-1)+" and pushing "+pieces_arr[(j-1) + 16].id);
+							temp_arr.push(new boardCell(pieces_arr[(j-1) + 16], document.getElementById("board").children[0].children[0].children[i].children[j]));
+						}
+						else if (j > 0 && j < 9 && i == 2)
+						{
+							//console.log("i="+i+",(j-1)="+(j-1)+" and pushing "+pieces_arr[(j-1) + 24].id);
+							temp_arr.push(new boardCell(pieces_arr[(j-1) + 24], document.getElementById("board").children[0].children[0].children[i].children[j]));
+						}
+						else
+						{
+							//console.log("i="+i+",(j-1)="+(j-1)+" and pushing null");
+							temp_arr.push(new boardCell(null, document.getElementById("board").children[0].children[0].children[i].children[j]));
+						}
+
+						document.getElementById("board").children[0].children[0].children[i].children[j].addEventListener("click", function() 
+						{
+							onCellClick(this.id);
+						});
+					}
+				}
+
+				board_arr.push(temp_arr);
+			}
+
+			onResizing();
+		};
+
+		window.onresize = onResizing;
+		window.onload = onLoad;
+	</script>
+
+	<head>
+		<title>Chess Openings</title>
+	</head>
+
+	<body style="background-color:black; font-family:Courier New, monospace;">
+		<div id="left_inner" style="background-color: #1e1e1e; position: absolute;">
+		</div>
+		<div id="right_inner" style="background-color: #1e1e1e; position: absolute;">
+		</div>
+		<div id="board" style="background-color: #1e1e1e; position: absolute;">
+			<table id="table">
+				<tr id="row1">
+					<td class="tbl_label_corner"></td>
+					<td class="tbl_label_row"></td>
+					<td class="tbl_label_row"></td>
+					<td class="tbl_label_row"></td>
+					<td class="tbl_label_row"></td>
+					<td class="tbl_label_row"></td>
+					<td class="tbl_label_row"></td>
+					<td class="tbl_label_row"></td>
+					<td class="tbl_label_row"></td>
+					<td class="tbl_label_corner"></td>
+				</tr>
+				<tr id="row2">
+					<td class="tbl_label_col"><b>8</b></td>
+					<td class="td_light" id="a8"></td>
+					<td class="td_dark" id="b8"></td>
+					<td class="td_light" id="c8"></td>
+					<td class="td_dark" id="d8"></td>
+					<td class="td_light" id="e8"></td>
+					<td class="td_dark" id="f8"></td>
+					<td class="td_light" id="g8"></td>
+					<td class="td_dark" id="h8"></td>
+					<td class="tbl_label_col"></td>
+				</tr>
+				<tr id="row3">
+					<td class="tbl_label_col"><b>7</b></td>
+					<td class="td_dark" id="a7"></td>
+					<td class="td_light" id="b7"></td>
+					<td class="td_dark" id="c7"></td>
+					<td class="td_light" id="d7"></td>
+					<td class="td_dark" id="e7"></td>
+					<td class="td_light" id="f7"></td>
+					<td class="td_dark" id="g7"></td>
+					<td class="td_light" id="h7"></td>
+					<td class="tbl_label_col"></td>
+				</tr>
+				<tr id="row4">
+					<td class="tbl_label_col"><b>6</b></td>
+					<td class="td_light" id="a6"></td>
+					<td class="td_dark" id="b6"></td>
+					<td class="td_light" id="c6"></td>
+					<td class="td_dark" id="d6"></td>
+					<td class="td_light" id="e6"></td>
+					<td class="td_dark" id="f6"></td>
+					<td class="td_light" id="g6"></td>
+					<td class="td_dark" id="h6"></td>
+					<td class="tbl_label_col"></td>
+				</tr>
+				<tr id="row5">
+					<td class="tbl_label_col"><b>5</b></td>
+					<td class="td_dark" id="a5"></td>
+					<td class="td_light" id="b5"></td>
+					<td class="td_dark" id="c5"></td>
+					<td class="td_light" id="d5"></td>
+					<td class="td_dark" id="e5"></td>
+					<td class="td_light" id="f5"></td>
+					<td class="td_dark" id="g5"></td>
+					<td class="td_light" id="h5"></td>
+					<td class="tbl_label_col"></td>
+				</tr>
+				<tr id="row6">
+					<td class="tbl_label_col"><b>4</b></td>
+					<td class="td_light" id="a4"></td>
+					<td class="td_dark" id="b4"></td>
+					<td class="td_light" id="c4"></td>
+					<td class="td_dark" id="d4"></td>
+					<td class="td_light" id="e4"></td>
+					<td class="td_dark" id="f4"></td>
+					<td class="td_light" id="g4"></td>
+					<td class="td_dark" id="h4"></td>
+					<td class="tbl_label_col"></td>
+				</tr>
+				<tr id="row7">
+					<td class="tbl_label_col"><b>3</b></td>
+					<td class="td_dark" id="a3"></td>
+					<td class="td_light" id="b3"></td>
+					<td class="td_dark" id="c3"></td>
+					<td class="td_light" id="d3"></td>
+					<td class="td_dark" id="e3"></td>
+					<td class="td_light" id="f3"></td>
+					<td class="td_dark" id="g3"></td>
+					<td class="td_light" id="h3"></td>
+					<td class="tbl_label_col"></td>
+				</tr>
+				<tr id="row8">
+					<td class="tbl_label_col"><b>2</b></td>
+					<td class="td_light" id="a2"></td>
+					<td class="td_dark" id="b2"></td>
+					<td class="td_light" id="c2"></td>
+					<td class="td_dark" id="d2"></td>
+					<td class="td_light" id="e2"></td>
+					<td class="td_dark" id="f2"></td>
+					<td class="td_light" id="g2"></td>
+					<td class="td_dark" id="h2"></td>
+					<td class="tbl_label_col"></td>
+				</tr>
+				<tr id="row9">
+					<td class="tbl_label_col"><b>1</b></td>
+					<td class="td_dark" id="a1"></td>
+					<td class="td_light" id="b1"></td>
+					<td class="td_dark" id="c1"></td>
+					<td class="td_light" id="d1"></td>
+					<td class="td_dark" id="e1"></td>
+					<td class="td_light" id="f1"></td>
+					<td class="td_dark" id="g1"></td>
+					<td class="td_light" id="h1"></td>
+					<td class="tbl_label_col"></td>
+				</tr>
+				<tr id="row10">
+					<td class="tbl_label_corner"></td>
+					<td class="tbl_label_row"><b>A</b></td>
+					<td class="tbl_label_row"><b>B</b></td>
+					<td class="tbl_label_row"><b>C</b></td>
+					<td class="tbl_label_row"><b>D</b></td>
+					<td class="tbl_label_row"><b>E</b></td>
+					<td class="tbl_label_row"><b>F</b></td>
+					<td class="tbl_label_row"><b>G</b></td>
+					<td class="tbl_label_row"><b>H</b></td>
+					<td class="tbl_label_corner"></td>
+				</tr>
+			</table>
+		</div>
+		<img src="light_rook.png" id="l_r_1" style="position: absolute; pointer-events: none;">
+		<img src="light_knight.png" id="l_n_1" style="position: absolute; pointer-events: none;">
+		<img src="light_bishop.png" id="l_b_1" style="position: absolute; pointer-events: none;">
+		<img src="light_queen.png" id="l_q" style="position: absolute; pointer-events: none;">
+		<img src="light_king.png" id="l_k" style="position: absolute; pointer-events: none;">
+		<img src="light_bishop.png" id="l_b_2" style="position: absolute; pointer-events: none;">
+		<img src="light_knight.png" id="l_n_2" style="position: absolute; pointer-events: none;">
+		<img src="light_rook.png" id="l_r_2" style="position: absolute; pointer-events: none;">
+		<img src="light_pawn.png" id="l_p_1" style="position: absolute; pointer-events: none;">
+		<img src="light_pawn.png" id="l_p_2" style="position: absolute; pointer-events: none;">
+		<img src="light_pawn.png" id="l_p_3" style="position: absolute; pointer-events: none;">
+		<img src="light_pawn.png" id="l_p_4" style="position: absolute; pointer-events: none;">
+		<img src="light_pawn.png" id="l_p_5" style="position: absolute; pointer-events: none;">
+		<img src="light_pawn.png" id="l_p_6" style="position: absolute; pointer-events: none;">
+		<img src="light_pawn.png" id="l_p_7" style="position: absolute; pointer-events: none;">
+		<img src="light_pawn.png" id="l_p_8" style="position: absolute; pointer-events: none;">
+		<img src="dark_rook.png" id="d_r_1" style="position: absolute; pointer-events: none;">
+		<img src="dark_knight.png" id="d_n_1" style="position: absolute; pointer-events: none;">
+		<img src="dark_bishop.png" id="d_b_1" style="position: absolute; pointer-events: none;">
+		<img src="dark_queen.png" id="d_q" style="position: absolute; pointer-events: none;">
+		<img src="dark_king.png" id="d_k" style="position: absolute; pointer-events: none;">
+		<img src="dark_bishop.png" id="d_b_2" style="position: absolute; pointer-events: none;">
+		<img src="dark_knight.png" id="d_n_2" style="position: absolute; pointer-events: none;">
+		<img src="dark_rook.png" id="d_r_2" style="position: absolute; pointer-events: none;">
+		<img src="dark_pawn.png" id="d_p_1" style="position: absolute; pointer-events: none;">
+		<img src="dark_pawn.png" id="d_p_2" style="position: absolute; pointer-events: none;">
+		<img src="dark_pawn.png" id="d_p_3" style="position: absolute; pointer-events: none;">
+		<img src="dark_pawn.png" id="d_p_4" style="position: absolute; pointer-events: none;">
+		<img src="dark_pawn.png" id="d_p_5" style="position: absolute; pointer-events: none;">
+		<img src="dark_pawn.png" id="d_p_6" style="position: absolute; pointer-events: none;">
+		<img src="dark_pawn.png" id="d_p_7" style="position: absolute; pointer-events: none;">
+		<img src="dark_pawn.png" id="d_p_8" style="position: absolute; pointer-events: none;">
+
+		<!--
+		<div class="content" style="height: 881; width: 881; padding: 0%; resize: none; position: absolute; left: 25%; top: 2%; text-align: center;">  
+			
+		</div>
+		-->
+	</body>
+</html>

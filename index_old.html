@@ -1,0 +1,1321 @@
+<html>	
+	<style type="text/css">
+		div
+		{
+			border-radius: 10px;
+		}
+
+		table
+		{
+			border: 1px solid black;
+			border-collapse: collapse;
+		}
+
+		td
+		{
+			background-color:white;
+			height:100;
+			width:100;
+			border: 0px;
+			border-collapse: collapse;
+			font-size: 20px;
+			position: absolute;
+		}
+
+		.tbl_label_row
+		{
+			border: 1px solid #1e1e1e;
+			background-color:#1e1e1e;
+			height:40;
+			width:100;
+			color: lightgray;
+		}
+
+		.tbl_label_row:hover
+		{
+			background-color:#1e1e1e;
+		}
+
+		.tbl_label_col
+		{
+			border: 1px solid #1e1e1e;
+			background-color:#1e1e1e;
+			height:100;
+			width:40;
+			text-align: right;
+			color: lightgray;
+		}
+
+		.tbl_label_col:hover
+		{
+			background-color:#1e1e1e;
+		}
+
+		.tbl_label_corner
+		{
+			border: 1px solid #1e1e1e;
+			background-color:#1e1e1e;
+			height:40;
+			width:40;
+			opacity: 0;
+		}
+
+		.tbl_label_corner:hover
+		{
+			border: 1px solid #1e1e1e;
+			background-color:#1e1e1e;
+			opacity: 0;
+		}
+
+		.td_light
+		{
+			background-color:#e2d1bd;
+		}
+
+		.td_light:hover
+		{
+			background-color:#e4dacf;
+		}
+
+		.td_dark
+		{
+			background-color:#8476ba;
+		}
+
+		.td_dark:hover
+		{
+			background-color:#9790b6;
+		}
+
+		button
+		{
+			background-color: lightgreen; 
+			border: 2px solid gray; 
+			border-radius: 30px; 
+			width: 150px; 
+			height: 80px; 
+			font-size: 33;
+		}
+
+		button:hover
+		{
+			background-color: #c2f3c2;
+			border: 2px solid white;
+		}
+
+		.modal 
+		{
+		  display: flex; /* Hidden by default */
+		  position: fixed; /* Stay in place */
+		  z-index: 1; /* Sit on top */
+		  height: 0px;
+		  left: 0;
+		  top: 0;
+		  width: 100%; /* Full width */
+		  height: 100%; /* Full height */
+		  overflow-y: auto; /* Enable scroll if needed */
+		  background-color: rgba(0,0,0,0); /* Black w/ opacity */
+		  color: red;
+		}
+
+		.modal-content
+		{
+		  margin: 15% auto; /* 15% from the top and centered */
+		  padding: 20px;
+		  border: 0px solid #888;
+		  width: 80%; /* Could be more or less, depending on screen size */
+		}
+	</style>
+
+
+	<script>
+		class boardCell
+		{
+			constructor(piece, elem)
+			{
+				this.piece = piece;
+				this.elem = elem;
+			}
+		}
+
+		var board_arr = [];
+		var flipped = false;
+		var cell_selected = null;
+		var openings_list = [["light", "e2-e4", "e7-e5", "g1-Nf3", "b8-Nc6", "f1-Bc4", "Nf6", "Ng5", "d5", "start", "exd5", "Na5", "Bb5", "c6", "dxc6", "bxc6", "Bd3", "h6", "Ne4", "Nxe4", "Bxe4"]
+							/*,["light", "e4", "e5", "Nf3", "Nc6", "Bc4", "Nf6", "Ng5", "d5", "start", "exd5", "Nxd5", "Nxf7", "Kxf7", "Qf3", "Ke8", "Bxd5"]
+							,["light", "e4", "e5", "Nf3", "Nc6", "Bc4", "Nf6", "Ng5", "d5", "start", "exd5", "Nxd5", "Nxf7", "Kxf7", "Qf3", "Qf6", "Bxd5"]
+							,["light", "e4", "e5", "Nf3", "Nc6", "Bc4", "Nf6", "Ng5", "d5", "start", "exd5", "Nxd5", "Nxf7", "Kxf7", "Qf3", "Ke6", "Nc3"]*/];
+		var accuracy_score = 0;
+		var time_score = 0;
+
+		async function sleep(ms)
+		{
+			await new Promise((resolve) => setTimeout(resolve, ms));
+		}
+
+		var getRowIndex = function(cell_id)
+		{
+			return (7 - (parseInt(cell_id.substring(1, 2)) - 1));
+		}
+
+		var getColIndex = function(cell_id)
+		{
+			var col_letter = cell_id.substring(0, 1);
+			var index_2 = -1;
+			if (col_letter == "a")
+				index_2 = 0;
+			else if (col_letter == "b")
+				index_2 = 1;
+			else if (col_letter == "c")
+				index_2 = 2;
+			else if (col_letter == "d")
+				index_2 = 3;
+			else if (col_letter == "e")
+				index_2 = 4;
+			else if (col_letter == "f")
+				index_2 = 5;
+			else if (col_letter == "g")
+				index_2 = 6;
+			else if (col_letter == "h")
+				index_2 = 7;
+
+			return index_2;
+		}
+
+		var setPieceCell = function(piece, old_cell_id, new_cell_id, left_over_width, chess_cel_length, label_cel_length)
+		{
+			/*var index_1 = getRowIndex(old_cell_id);
+			var index_2 = getColIndex(old_cell_id);
+
+			board_arr[index_1][index_2].piece = null;*/
+
+			var index_1 = getRowIndex(new_cell_id);
+			var index_2 = getColIndex(new_cell_id);
+
+			board_arr[index_1][index_2].piece = piece;
+
+			if (!flipped)
+			{
+				piece.style.left = (left_over_width / 2) + 16 + label_cel_length + ((index_2) * chess_cel_length);
+				piece.style.top = 8 + label_cel_length + ((index_1) * chess_cel_length);
+			}
+			else
+			{
+				piece.style.left = (left_over_width / 2) + 16 + label_cel_length + ((7-index_2) * chess_cel_length);
+				piece.style.top = 8 + label_cel_length + ((7-index_1) * chess_cel_length);
+			}
+		}
+
+		var pieceCanMoveTo = function(selected_cell, new_cell_id)
+		{
+			var cur_index_1 = getRowIndex(selected_cell.elem.id);
+			var cur_index_2 = getColIndex(selected_cell.elem.id);
+
+			var positions_arr = [];
+
+			if (selected_cell.piece.id.substring(2,3) == "p")
+			{
+				if (selected_cell.piece.id.substring(0,1) == "l")
+				{
+					if (cur_index_1-1 > -1 && board_arr[cur_index_1-1][cur_index_2].piece == null)
+						positions_arr.push(board_arr[cur_index_1-1][cur_index_2].elem.id);
+
+					if (selected_cell.elem.id.substring(1,2) == "2")
+						positions_arr.push(board_arr[cur_index_1-2][cur_index_2].elem.id);
+
+					if (cur_index_1-1 > -1 && cur_index_2-1 > -1 && board_arr[cur_index_1-1][cur_index_2-1].piece != null 
+						&& board_arr[cur_index_1-1][cur_index_2-1].piece.id.substring(0,1) == "d")
+						positions_arr.push(board_arr[cur_index_1-1][cur_index_2-1].elem.id);
+
+					if (cur_index_1-1 > -1 && cur_index_2+1 < 8 && board_arr[cur_index_1-1][cur_index_2+1].piece != null 
+						&& board_arr[cur_index_1-1][cur_index_2+1].piece.id.substring(0,1) == "d")
+						positions_arr.push(board_arr[cur_index_1-1][cur_index_2+1].elem.id);
+				}
+				else
+				{
+					if (cur_index_1+1 < 8 && board_arr[cur_index_1+1][cur_index_2].piece == null)
+						positions_arr.push(board_arr[cur_index_1+1][cur_index_2].elem.id);
+
+					if (selected_cell.elem.id.substring(1,2) == "7")
+						positions_arr.push(board_arr[cur_index_1+2][cur_index_2].elem.id);
+
+					if (cur_index_1+1 < 8 && cur_index_2-1 > -1 && board_arr[cur_index_1+1][cur_index_2-1].piece != null 
+						&& board_arr[cur_index_1+1][cur_index_2-1].piece.id.substring(0,1) == "l")
+						positions_arr.push(board_arr[cur_index_1+1][cur_index_2-1].elem.id);
+
+					if (cur_index_1+1 < 8 && cur_index_2+1 < 8 && board_arr[cur_index_1+1][cur_index_2+1].piece != null 
+						&& board_arr[cur_index_1+1][cur_index_2+1].piece.id.substring(0,1) == "l")
+						positions_arr.push(board_arr[cur_index_1+1][cur_index_2+1].elem.id);
+				}
+			}
+			if (selected_cell.piece.id.substring(2,3) == "r" || selected_cell.piece.id.substring(2,3) == "q")
+			{
+				for (var up=cur_index_1-1; up > -1; up--)
+				{
+					if (board_arr[up][cur_index_2].piece == null)
+						positions_arr.push(board_arr[up][cur_index_2].elem.id);
+					else if (board_arr[up][cur_index_2].piece.id.substring(0,1) != selected_cell.piece.id.substring(0,1))
+					{
+						positions_arr.push(board_arr[up][cur_index_2].elem.id);
+						break;
+					}
+					else if (board_arr[up][cur_index_2].piece.id.substring(0,1) == selected_cell.piece.id.substring(0,1))
+						break;
+				}
+
+				for (var down=cur_index_1+1; down < 8; down++)
+				{
+					if (board_arr[down][cur_index_2].piece == null)
+						positions_arr.push(board_arr[down][cur_index_2].elem.id);
+					else if (board_arr[down][cur_index_2].piece.id.substring(0,1) != selected_cell.piece.id.substring(0,1))
+					{
+						positions_arr.push(board_arr[down][cur_index_2].elem.id);
+						break;
+					}
+					else if (board_arr[down][cur_index_2].piece.id.substring(0,1) == selected_cell.piece.id.substring(0,1))
+						break;
+				}
+
+				for (var left=cur_index_2-1; left > -1; left--)
+				{
+					if (board_arr[cur_index_1][left].piece == null)
+						positions_arr.push(board_arr[cur_index_1][left].elem.id);
+					else if (board_arr[cur_index_1][left].piece.id.substring(0,1) != selected_cell.piece.id.substring(0,1))
+					{
+						positions_arr.push(board_arr[cur_index_1][left].elem.id);
+						break;
+					}
+					else if (board_arr[cur_index_1][left].piece.id.substring(0,1) == selected_cell.piece.id.substring(0,1))
+						break;
+				}
+
+				for (var right=cur_index_2+1; right < 8; right++)
+				{
+					if (board_arr[cur_index_1][right].piece == null)
+						positions_arr.push(board_arr[cur_index_1][right].elem.id);
+					else if (board_arr[cur_index_1][right].piece.id.substring(0,1) != selected_cell.piece.id.substring(0,1))
+					{
+						positions_arr.push(board_arr[cur_index_1][right].elem.id);
+						break;
+					}
+					else if (board_arr[cur_index_1][right].piece.id.substring(0,1) == selected_cell.piece.id.substring(0,1))
+						break;
+				}
+			}
+			if (selected_cell.piece.id.substring(2,3) == "n")
+			{
+				if (cur_index_1-2 > -1 && cur_index_2-1 > -1)
+				{
+					if (board_arr[cur_index_1-2][cur_index_2-1].piece == null)
+						positions_arr.push(board_arr[cur_index_1-2][cur_index_2-1].elem.id);
+					else if (board_arr[cur_index_1-2][cur_index_2-1].piece.id.substring(0,1) != selected_cell.piece.id.substring(0,1))
+						positions_arr.push(board_arr[cur_index_1-2][cur_index_2-1].elem.id);
+				}
+
+				if (cur_index_1-2 > -1 && cur_index_2+1 < 8)
+				{
+					if (board_arr[cur_index_1-2][cur_index_2+1].piece == null)
+						positions_arr.push(board_arr[cur_index_1-2][cur_index_2+1].elem.id);
+					else if (board_arr[cur_index_1-2][cur_index_2+1].piece.id.substring(0,1) != selected_cell.piece.id.substring(0,1))
+						positions_arr.push(board_arr[cur_index_1-2][cur_index_2+1].elem.id);
+				}
+
+				if (cur_index_1+2 < 8 && cur_index_2-1 > -1)
+				{
+					if (board_arr[cur_index_1+2][cur_index_2-1].piece == null)
+						positions_arr.push(board_arr[cur_index_1+2][cur_index_2-1].elem.id);
+					else if (board_arr[cur_index_1+2][cur_index_2-1].piece.id.substring(0,1) != selected_cell.piece.id.substring(0,1))
+						positions_arr.push(board_arr[cur_index_1+2][cur_index_2-1].elem.id);
+				}
+
+				if (cur_index_1+2 < 8 && cur_index_2+1 < 8)
+				{
+					if (board_arr[cur_index_1+2][cur_index_2+1].piece == null)
+						positions_arr.push(board_arr[cur_index_1+2][cur_index_2+1].elem.id);
+					else if (board_arr[cur_index_1+2][cur_index_2+1].piece.id.substring(0,1) != selected_cell.piece.id.substring(0,1))
+						positions_arr.push(board_arr[cur_index_1+2][cur_index_2+1].elem.id);
+				}
+
+
+
+				if (cur_index_1-1 > -1 && cur_index_2-2 > -1)
+				{
+					if (board_arr[cur_index_1-1][cur_index_2-2].piece == null)
+						positions_arr.push(board_arr[cur_index_1-1][cur_index_2-2].elem.id);
+					else if (board_arr[cur_index_1-1][cur_index_2-2].piece.id.substring(0,1) != selected_cell.piece.id.substring(0,1))
+						positions_arr.push(board_arr[cur_index_1-1][cur_index_2-2].elem.id);
+				}
+
+				if (cur_index_1+1 < 8 && cur_index_2-2 > -1)
+				{
+					if (board_arr[cur_index_1+1][cur_index_2-2].piece == null)
+						positions_arr.push(board_arr[cur_index_1+1][cur_index_2-2].elem.id);
+					else if (board_arr[cur_index_1+1][cur_index_2-2].piece.id.substring(0,1) != selected_cell.piece.id.substring(0,1))
+						positions_arr.push(board_arr[cur_index_1+1][cur_index_2-2].elem.id);
+				}
+
+				if (cur_index_1-1 > -1 && cur_index_2+2 < 8)
+				{
+					if (board_arr[cur_index_1-1][cur_index_2+2].piece == null)
+						positions_arr.push(board_arr[cur_index_1-1][cur_index_2+2].elem.id);
+					else if (board_arr[cur_index_1-1][cur_index_2+2].piece.id.substring(0,1) != selected_cell.piece.id.substring(0,1))
+						positions_arr.push(board_arr[cur_index_1-1][cur_index_2+2].elem.id);
+				}
+
+				if (cur_index_1+1 < 8 && cur_index_2+2 < 8)
+				{
+					if (board_arr[cur_index_1+1][cur_index_2+2].piece == null)
+						positions_arr.push(board_arr[cur_index_1+1][cur_index_2+2].elem.id);
+					else if (board_arr[cur_index_1+1][cur_index_2+2].piece.id.substring(0,1) != selected_cell.piece.id.substring(0,1))
+						positions_arr.push(board_arr[cur_index_1+1][cur_index_2+2].elem.id);
+				}
+
+			}
+			if (selected_cell.piece.id.substring(2,3) == "b" || selected_cell.piece.id.substring(2,3) == "q")
+			{
+				var row = cur_index_1-1;
+				var col = cur_index_2-1;
+
+				while (row > -1 && col > -1)
+				{
+					if (board_arr[row][col].piece == null)
+						positions_arr.push(board_arr[row][col].elem.id);
+					else if (board_arr[row][col].piece.id.substring(0,1) != selected_cell.piece.id.substring(0,1))
+					{
+						positions_arr.push(board_arr[row][col].elem.id);
+						break;
+					}
+					else if (board_arr[row][col].piece.id.substring(0,1) == selected_cell.piece.id.substring(0,1))
+						break;
+
+					row--;
+					col--;
+				}
+
+				row = cur_index_1-1;
+				col = cur_index_2+1;
+
+				while (row > -1 && col < 8)
+				{
+					if (board_arr[row][col].piece == null)
+						positions_arr.push(board_arr[row][col].elem.id);
+					else if (board_arr[row][col].piece.id.substring(0,1) != selected_cell.piece.id.substring(0,1))
+					{
+						positions_arr.push(board_arr[row][col].elem.id);
+						break;
+					}
+					else if (board_arr[row][col].piece.id.substring(0,1) == selected_cell.piece.id.substring(0,1))
+						break;
+
+					row--;
+					col++;
+				}
+
+				row = cur_index_1+1;
+				col = cur_index_2-1;
+
+				while (row < 8 && col > -1)
+				{
+					if (board_arr[row][col].piece == null)
+						positions_arr.push(board_arr[row][col].elem.id);
+					else if (board_arr[row][col].piece.id.substring(0,1) != selected_cell.piece.id.substring(0,1))
+					{
+						positions_arr.push(board_arr[row][col].elem.id);
+						break;
+					}
+					else if (board_arr[row][col].piece.id.substring(0,1) == selected_cell.piece.id.substring(0,1))
+						break;
+
+					row++;
+					col--;
+				}
+
+				row = cur_index_1+1;
+				col = cur_index_2+1;
+
+				while (row < 8 && col < 8)
+				{
+					if (board_arr[row][col].piece == null)
+						positions_arr.push(board_arr[row][col].elem.id);
+					else if (board_arr[row][col].piece.id.substring(0,1) != selected_cell.piece.id.substring(0,1))
+					{
+						positions_arr.push(board_arr[row][col].elem.id);
+						break;
+					}
+					else if (board_arr[row][col].piece.id.substring(0,1) == selected_cell.piece.id.substring(0,1))
+						break;
+
+					row++;
+					col++;
+				}
+			}
+			if (selected_cell.piece.id.substring(2,3) == "k")
+			{
+				if (cur_index_1-1 > -1 
+					&& (board_arr[cur_index_1-1][cur_index_2].piece == null 
+						|| board_arr[cur_index_1-1][cur_index_2].piece.id.substring(0,1) != selected_cell.piece.id.substring(0,1)))
+				{
+					positions_arr.push(board_arr[cur_index_1-1][cur_index_2].elem.id);
+				}
+
+				if (cur_index_1+1 < 8 
+					&& (board_arr[cur_index_1+1][cur_index_2].piece == null 
+						|| board_arr[cur_index_1+1][cur_index_2].piece.id.substring(0,1) != selected_cell.piece.id.substring(0,1)))
+				{
+					positions_arr.push(board_arr[cur_index_1+1][cur_index_2].elem.id);
+				}
+
+				if (cur_index_2-1 > -1 
+					&& (board_arr[cur_index_1][cur_index_2-1].piece == null 
+						|| board_arr[cur_index_1][cur_index_2-1].piece.id.substring(0,1) != selected_cell.piece.id.substring(0,1)))
+				{
+					positions_arr.push(board_arr[cur_index_1][cur_index_2-1].elem.id);
+				}
+				
+				if (cur_index_2+1 < 8 
+					&& (board_arr[cur_index_1][cur_index_2+1].piece == null 
+						|| board_arr[cur_index_1][cur_index_2+1].piece.id.substring(0,1) != selected_cell.piece.id.substring(0,1)))
+				{
+					positions_arr.push(board_arr[cur_index_1][cur_index_2+1].elem.id);
+				}
+
+
+				// Corners
+				if (cur_index_1-1 > -1 && cur_index_2-1 > -1
+					&& (board_arr[cur_index_1-1][cur_index_2-1].piece == null 
+						|| board_arr[cur_index_1-1][cur_index_2-1].piece.id.substring(0,1) != selected_cell.piece.id.substring(0,1)))
+				{
+					positions_arr.push(board_arr[cur_index_1-1][cur_index_2-1].elem.id);
+				}
+
+				if (cur_index_1+1 < 8 && cur_index_2+1 < 8
+					&& (board_arr[cur_index_1+1][cur_index_2+1].piece == null 
+						|| board_arr[cur_index_1+1][cur_index_2+1].piece.id.substring(0,1) != selected_cell.piece.id.substring(0,1)))
+				{
+					positions_arr.push(board_arr[cur_index_1+1][cur_index_2+1].elem.id);
+				}
+
+				if (cur_index_1+1 < 8 && cur_index_2-1 > -1 
+					&& (board_arr[cur_index_1+1][cur_index_2-1].piece == null 
+						|| board_arr[cur_index_1+1][cur_index_2-1].piece.id.substring(0,1) != selected_cell.piece.id.substring(0,1)))
+				{
+					positions_arr.push(board_arr[cur_index_1+1][cur_index_2-1].elem.id);
+				}
+				
+				if (cur_index_1-1 > -1 && cur_index_2+1 < 8 
+					&& (board_arr[cur_index_1-1][cur_index_2+1].piece == null 
+						|| board_arr[cur_index_1-1][cur_index_2+1].piece.id.substring(0,1) != selected_cell.piece.id.substring(0,1)))
+				{
+					positions_arr.push(board_arr[cur_index_1-1][cur_index_2+1].elem.id);
+				}
+			}
+
+
+			for (var i=0; i<positions_arr.length; i++)
+			{
+				if (new_cell_id == positions_arr[i])
+					return true;
+			}
+
+			return false;
+		}
+
+		var onCellClick = function(cell_id) 
+		{
+			var index_1 = getRowIndex(cell_id);
+			var index_2 = getColIndex(cell_id);
+
+			//console.log("index_1 = "+index_1);
+			//console.log("index_2 = "+index_2);
+
+			if (board_arr[index_1][index_2].piece == null)
+				console.log(board_arr[index_1][index_2].elem.id+" clicked: null");
+			else
+				console.log(board_arr[index_1][index_2].elem.id+" clicked: "+board_arr[index_1][index_2].piece.id);
+
+			/*console.log("	Before:");
+			if (cell_selected != null)
+				console.log("cell_selected = "+cell_selected.elem.id+","+(cell_selected.piece == null ? "no piece" : cell_selected.piece.id));
+			else
+				console.log("cell_selected = null");*/
+
+			if (cell_selected == board_arr[index_1][index_2])
+			{
+				cell_selected = null;
+				if (board_arr[index_1][index_2].elem.classList.contains("td_light"))
+					board_arr[index_1][index_2].elem.style.backgroundColor = "#e2d1bd";
+				else
+					board_arr[index_1][index_2].elem.style.backgroundColor = "#8476ba";
+			}
+			else
+			{
+				if (cell_selected != null) 
+				{
+					if (cell_selected.elem.classList.contains("td_light"))
+						cell_selected.elem.style.backgroundColor = "#e2d1bd";
+					else
+						cell_selected.elem.style.backgroundColor = "#8476ba";
+
+					if (cell_selected.piece != null)
+					{
+						if (pieceCanMoveTo(cell_selected, board_arr[index_1][index_2].elem.id))
+						{
+							var min_length = window.innerHeight < window.innerWidth ? window.innerHeight : window.innerWidth;
+							min_length = min_length - 16;
+
+							var left_over_width = window.innerWidth - 32 - min_length;
+
+							var chess_cel_length = min_length / 8.8;
+							var label_cel_length = (min_length - (chess_cel_length * 8)) / 2;
+
+							if (board_arr[index_1][index_2].piece != null)
+							{
+								console.log("made "+board_arr[index_1][index_2].piece.id+" disappear");
+								board_arr[index_1][index_2].piece.style.opacity = 0;
+							}
+
+							setPieceCell(cell_selected.piece, cell_selected.elem.id, board_arr[index_1][index_2].elem.id, left_over_width, chess_cel_length, label_cel_length);
+
+							console.log("cleared old cell "+cell_selected.elem.id);
+							var index_1_old = getRowIndex(cell_selected.elem.id);
+							var index_2_old = getColIndex(cell_selected.elem.id);
+
+							console.log("old indexes = "+index_1_old+","+index_2_old);
+
+							board_arr[index_1_old][index_2_old].piece = null;
+
+							console.log("moved piece to "+board_arr[index_1][index_2].elem.id);
+						}
+						else
+							console.log("couldn't move piece");
+
+						cell_selected = null;
+					}
+					else
+					{
+						cell_selected = board_arr[index_1][index_2];
+						board_arr[index_1][index_2].elem.style.backgroundColor = "lightblue";
+					}
+				}
+				else
+				{
+					cell_selected = board_arr[index_1][index_2];
+					board_arr[index_1][index_2].elem.style.backgroundColor = "lightblue";
+				}
+			}
+
+			/*console.log("	After:");
+			if (cell_selected != null)
+				console.log("cell_selected = "+cell_selected.elem.id+","+(cell_selected.piece == null ? "no piece" : cell_selected.piece.id));
+			else
+				console.log("cell_selected = null");*/
+		}
+
+		var flipBoardToDark = function(event)
+		{
+			var min_length = window.innerHeight < window.innerWidth ? window.innerHeight : window.innerWidth;
+			min_length = min_length - 16;
+
+			var left_over_width = window.innerWidth - 32 - min_length;
+
+			var chess_cel_length = min_length / 8.8;
+			var label_cel_length = (min_length - (chess_cel_length * 8)) / 2;
+
+			for (var i=0; i<10; i++)
+			{
+				for (var j=0; j<10; j++)
+				{
+					if (i > 0 && i < 9 && j > 0 && j < 9)
+					{
+						document.getElementById("board").children[0].children[0].children[i].children[j].style.left 
+							= label_cel_length + ((8-j) * chess_cel_length);
+						document.getElementById("board").children[0].children[0].children[i].children[j].style.top 
+							= label_cel_length + ((8-i) * chess_cel_length);
+					}
+					else if ((i == 0 && j == 0) || (i == 0 && j == 9) || (i == 9 && j == 0) || (i == 9 && j == 9))
+					{
+						document.getElementById("board").children[0].children[0].children[i].children[j].style.left 
+							= (j > 0 ? ((j-1) * chess_cel_length) : 0) + (j > 0 ? label_cel_length : 0);
+						document.getElementById("board").children[0].children[0].children[i].children[j].style.top 
+							= (i > 0 ? ((i-1) * chess_cel_length) : 0) + (i > 0 ? label_cel_length : 0);
+					}
+					else if (i == 0 || i == 9)
+					{
+						document.getElementById("board").children[0].children[0].children[i].children[j].style.left 
+							= ((8-j) * chess_cel_length) + (j > 0 ? label_cel_length : 0);
+						document.getElementById("board").children[0].children[0].children[i].children[j].style.top 
+							= (i > 0 ? ((i-1) * chess_cel_length) : 0) + (i > 0 ? label_cel_length : 0);
+					}
+					else if (j == 0 || j == 9)
+					{
+						document.getElementById("board").children[0].children[0].children[i].children[j].style.left 
+							= (j > 0 ? ((j-1) * chess_cel_length) : 0) + (j > 0 ? label_cel_length : 0);
+						document.getElementById("board").children[0].children[0].children[i].children[j].style.top 
+							= ((8-i) * chess_cel_length) + (i > 0 ? label_cel_length : 0);
+					}
+				}
+			}
+
+			var pieces_arr = [document.getElementById("l_r_1")
+							 ,document.getElementById("l_n_1")
+							 ,document.getElementById("l_b_1")
+							 ,document.getElementById("l_q")
+							 ,document.getElementById("l_k")
+							 ,document.getElementById("l_b_2")
+							 ,document.getElementById("l_n_2")
+							 ,document.getElementById("l_r_2")
+							 ,document.getElementById("l_p_1")
+							 ,document.getElementById("l_p_2")
+							 ,document.getElementById("l_p_3")
+							 ,document.getElementById("l_p_4")
+							 ,document.getElementById("l_p_5")
+							 ,document.getElementById("l_p_6")
+							 ,document.getElementById("l_p_7")
+							 ,document.getElementById("l_p_8")
+							 ,document.getElementById("d_r_1")
+							 ,document.getElementById("d_n_1")
+							 ,document.getElementById("d_b_1")
+							 ,document.getElementById("d_q")
+							 ,document.getElementById("d_k")
+							 ,document.getElementById("d_b_2")
+							 ,document.getElementById("d_n_2")
+							 ,document.getElementById("d_r_2")
+							 ,document.getElementById("d_p_1")
+							 ,document.getElementById("d_p_2")
+							 ,document.getElementById("d_p_3")
+							 ,document.getElementById("d_p_4")
+							 ,document.getElementById("d_p_5")
+							 ,document.getElementById("d_p_6")
+							 ,document.getElementById("d_p_7")
+							 ,document.getElementById("d_p_8")];
+
+			setPieceCell(document.getElementById("l_r_1"), "h8", "a1", left_over_width, chess_cel_length, label_cel_length);
+			setPieceCell(document.getElementById("l_n_1"), "g8", "b1", left_over_width, chess_cel_length, label_cel_length);
+			setPieceCell(document.getElementById("l_b_1"), "f8", "c1", left_over_width, chess_cel_length, label_cel_length);
+			setPieceCell(document.getElementById("l_q"), "e8", "d1", left_over_width, chess_cel_length, label_cel_length);
+			setPieceCell(document.getElementById("l_k"), "d8", "e1", left_over_width, chess_cel_length, label_cel_length);
+			setPieceCell(document.getElementById("l_b_2"), "c8", "f1", left_over_width, chess_cel_length, label_cel_length);
+			setPieceCell(document.getElementById("l_n_2"), "b8", "g1", left_over_width, chess_cel_length, label_cel_length);
+			setPieceCell(document.getElementById("l_r_2"), "a8", "h1", left_over_width, chess_cel_length, label_cel_length);
+			setPieceCell(document.getElementById("l_p_1"), "h8", "a2", left_over_width, chess_cel_length, label_cel_length);
+			setPieceCell(document.getElementById("l_p_2"), "g8", "b2", left_over_width, chess_cel_length, label_cel_length);
+			setPieceCell(document.getElementById("l_p_3"), "f8", "c2", left_over_width, chess_cel_length, label_cel_length);
+			setPieceCell(document.getElementById("l_p_4"), "e8", "d2", left_over_width, chess_cel_length, label_cel_length);
+			setPieceCell(document.getElementById("l_p_5"), "d8", "e2", left_over_width, chess_cel_length, label_cel_length);
+			setPieceCell(document.getElementById("l_p_6"), "c8", "f2", left_over_width, chess_cel_length, label_cel_length);
+			setPieceCell(document.getElementById("l_p_7"), "b8", "g2", left_over_width, chess_cel_length, label_cel_length);
+			setPieceCell(document.getElementById("l_p_8"), "a8", "h2", left_over_width, chess_cel_length, label_cel_length);
+
+			setPieceCell(document.getElementById("d_r_2"), "a1", "h8", left_over_width, chess_cel_length, label_cel_length);
+			setPieceCell(document.getElementById("d_n_2"), "b1", "g8", left_over_width, chess_cel_length, label_cel_length);
+			setPieceCell(document.getElementById("d_b_2"), "c1", "f8", left_over_width, chess_cel_length, label_cel_length);
+			setPieceCell(document.getElementById("d_k"), "d1", "e8", left_over_width, chess_cel_length, label_cel_length);
+			setPieceCell(document.getElementById("d_q"), "e1", "d8", left_over_width, chess_cel_length, label_cel_length);
+			setPieceCell(document.getElementById("d_b_1"), "f1", "c8", left_over_width, chess_cel_length, label_cel_length);
+			setPieceCell(document.getElementById("d_n_1"), "g1", "b8", left_over_width, chess_cel_length, label_cel_length);
+			setPieceCell(document.getElementById("d_r_1"), "h1", "a8", left_over_width, chess_cel_length, label_cel_length);
+			setPieceCell(document.getElementById("d_p_8"), "a2", "h7", left_over_width, chess_cel_length, label_cel_length);
+			setPieceCell(document.getElementById("d_p_7"), "b2", "g7", left_over_width, chess_cel_length, label_cel_length);
+			setPieceCell(document.getElementById("d_p_6"), "c2", "f7", left_over_width, chess_cel_length, label_cel_length);
+			setPieceCell(document.getElementById("d_p_5"), "d2", "e7", left_over_width, chess_cel_length, label_cel_length);
+			setPieceCell(document.getElementById("d_p_4"), "e2", "d7", left_over_width, chess_cel_length, label_cel_length);
+			setPieceCell(document.getElementById("d_p_3"), "f2", "c7", left_over_width, chess_cel_length, label_cel_length);
+			setPieceCell(document.getElementById("d_p_2"), "g2", "b7", left_over_width, chess_cel_length, label_cel_length);
+			setPieceCell(document.getElementById("d_p_1"), "h2", "a7", left_over_width, chess_cel_length, label_cel_length);
+		}
+
+		var onResizing = function(event)
+		{
+			/*if (window.innerWidth < 600)
+			{
+				window.resizeTo(600,window.innerHeight);
+			}
+
+			if (window.innerHeight < 440)
+			{
+				window.resizeTo(window.innerWidth,440);
+			}*/
+
+			//console.clear();
+
+			//console.log("innerWidth="+window.innerWidth+"   innerHeight="+window.innerHeight);
+
+			var min_length = window.innerHeight < window.innerWidth ? window.innerHeight : window.innerWidth;
+			min_length = min_length - 16;
+
+			//console.log("min_length="+min_length);
+
+			document.getElementById("board").style.width = min_length;
+			document.getElementById("board").style.height = min_length;
+
+			document.getElementById("left_inner").style.height = window.innerHeight - 16;
+			document.getElementById("right_inner").style.height = window.innerHeight - 16;
+
+			var left_over_width = window.innerWidth - 32 - min_length;
+
+			console.clear();
+			console.log("left_inner width = "+(left_over_width / 2));
+
+			if ((left_over_width / 2) < 200)
+			{
+				document.getElementById("left_inner").style.width = left_over_width;
+				document.getElementById("right_inner").style.width = (window.innerWidth - 32);
+
+				document.getElementById("right_inner").style.left = 8;
+				document.getElementById("right_inner").style.top = window.innerHeight;
+
+				document.getElementById("board").style.left = parseFloat(document.getElementById("left_inner").style.width,10) + 16;
+				document.getElementById("board").style.top = 8;
+			}
+			else
+			{
+				document.getElementById("left_inner").style.width = (left_over_width / 2);
+				document.getElementById("right_inner").style.width = (left_over_width / 2);
+
+				document.getElementById("board").style.left = parseFloat(document.getElementById("left_inner").style.width,10) + 16;
+				document.getElementById("board").style.top = 8;
+
+				document.getElementById("right_inner").style.left = parseFloat(document.getElementById("left_inner").style.width,10) + 16 + min_length + 8;
+				document.getElementById("right_inner").style.top = 8;
+			}
+
+			var chess_cel_length = min_length / 8.8;
+			var label_cel_length = (min_length - (chess_cel_length * 8)) / 2;
+
+			for (var i=0; i<10; i++)
+			{
+				for (var j=0; j<10; j++)
+				{
+					if (i > 0 && i < 9 && j > 0 && j < 9)
+					{
+						document.getElementById("board").children[0].children[0].children[i].children[j].style.width = chess_cel_length;
+						document.getElementById("board").children[0].children[0].children[i].children[j].style.height = chess_cel_length;
+
+						document.getElementById("board").children[0].children[0].children[i].children[j].style.left 
+							= label_cel_length + ((j-1) * chess_cel_length);
+						document.getElementById("board").children[0].children[0].children[i].children[j].style.top 
+							= label_cel_length + ((i-1) * chess_cel_length);
+					}
+					else if ((i == 0 && j == 0) || (i == 0 && j == 9) || (i == 9 && j == 0) || (i == 9 && j == 9))
+					{
+						document.getElementById("board").children[0].children[0].children[i].children[j].style.width = label_cel_length-4;
+						document.getElementById("board").children[0].children[0].children[i].children[j].style.height = label_cel_length-4;
+
+						document.getElementById("board").children[0].children[0].children[i].children[j].style.left 
+							= (j > 0 ? ((j-1) * chess_cel_length) : 0) + (j > 0 ? label_cel_length : 0);
+						document.getElementById("board").children[0].children[0].children[i].children[j].style.top 
+							= (i > 0 ? ((i-1) * chess_cel_length) : 0) + (i > 0 ? label_cel_length : 0);
+					}
+					else if (i == 0 || i == 9)
+					{
+						document.getElementById("board").children[0].children[0].children[i].children[j].style.width = chess_cel_length-4;
+						document.getElementById("board").children[0].children[0].children[i].children[j].style.height = label_cel_length-4;
+
+						document.getElementById("board").children[0].children[0].children[i].children[j].style.left 
+							= ((j-1) * chess_cel_length) + (j > 0 ? label_cel_length : 0);
+						document.getElementById("board").children[0].children[0].children[i].children[j].style.top 
+							= (i > 0 ? ((i-1) * chess_cel_length) : 0) + (i > 0 ? label_cel_length : 0);
+					}
+					else if (j == 0 || j == 9)
+					{
+						document.getElementById("board").children[0].children[0].children[i].children[j].style.width = label_cel_length-4;
+						document.getElementById("board").children[0].children[0].children[i].children[j].style.height = chess_cel_length-4;
+
+						document.getElementById("board").children[0].children[0].children[i].children[j].style.left 
+							= (j > 0 ? ((j-1) * chess_cel_length) : 0) + (j > 0 ? label_cel_length : 0);
+						document.getElementById("board").children[0].children[0].children[i].children[j].style.top 
+							= ((i-1) * chess_cel_length) + (i > 0 ? label_cel_length : 0);
+					}
+				}
+			}
+
+			var pieces_arr = [document.getElementById("l_r_1")
+							 ,document.getElementById("l_n_1")
+							 ,document.getElementById("l_b_1")
+							 ,document.getElementById("l_q")
+							 ,document.getElementById("l_k")
+							 ,document.getElementById("l_b_2")
+							 ,document.getElementById("l_n_2")
+							 ,document.getElementById("l_r_2")
+							 ,document.getElementById("l_p_1")
+							 ,document.getElementById("l_p_2")
+							 ,document.getElementById("l_p_3")
+							 ,document.getElementById("l_p_4")
+							 ,document.getElementById("l_p_5")
+							 ,document.getElementById("l_p_6")
+							 ,document.getElementById("l_p_7")
+							 ,document.getElementById("l_p_8")
+							 ,document.getElementById("d_r_1")
+							 ,document.getElementById("d_n_1")
+							 ,document.getElementById("d_b_1")
+							 ,document.getElementById("d_q")
+							 ,document.getElementById("d_k")
+							 ,document.getElementById("d_b_2")
+							 ,document.getElementById("d_n_2")
+							 ,document.getElementById("d_r_2")
+							 ,document.getElementById("d_p_1")
+							 ,document.getElementById("d_p_2")
+							 ,document.getElementById("d_p_3")
+							 ,document.getElementById("d_p_4")
+							 ,document.getElementById("d_p_5")
+							 ,document.getElementById("d_p_6")
+							 ,document.getElementById("d_p_7")
+							 ,document.getElementById("d_p_8")];
+
+			for (var i=0; i<32; i++)
+			{
+				pieces_arr[i].style.width = chess_cel_length;
+				pieces_arr[i].style.height = chess_cel_length;
+
+				if (i < 8)
+				{
+					pieces_arr[i].style.left = (left_over_width / 2) + 16 + label_cel_length + ((i % 8) * chess_cel_length);
+					pieces_arr[i].style.top = 8 + label_cel_length + (7 * chess_cel_length);
+				}
+				else if (i < 16)
+				{
+					pieces_arr[i].style.left = (left_over_width / 2) + 16 + label_cel_length + ((i % 8) * chess_cel_length);
+					pieces_arr[i].style.top = 8 + label_cel_length + (6 * chess_cel_length);
+				}
+				else if (i < 24)
+				{
+					pieces_arr[i].style.left = (left_over_width / 2) + 16 + label_cel_length + ((i % 8) * chess_cel_length);
+					pieces_arr[i].style.top = 8 + label_cel_length + (0 * chess_cel_length);
+				}
+				else
+				{
+					pieces_arr[i].style.left = (left_over_width / 2) + 16 + label_cel_length + ((i % 8) * chess_cel_length);
+					pieces_arr[i].style.top = 8 + label_cel_length + (1 * chess_cel_length);
+				}
+			}
+
+			if (flipped)
+				flipBoardToDark();
+		};
+
+		var onLoad = function(event) 
+		{
+			board_arr = [];
+
+			var pieces_arr = [document.getElementById("l_r_1")
+							 ,document.getElementById("l_n_1")
+							 ,document.getElementById("l_b_1")
+							 ,document.getElementById("l_q")
+							 ,document.getElementById("l_k")
+							 ,document.getElementById("l_b_2")
+							 ,document.getElementById("l_n_2")
+							 ,document.getElementById("l_r_2")
+							 ,document.getElementById("l_p_1")
+							 ,document.getElementById("l_p_2")
+							 ,document.getElementById("l_p_3")
+							 ,document.getElementById("l_p_4")
+							 ,document.getElementById("l_p_5")
+							 ,document.getElementById("l_p_6")
+							 ,document.getElementById("l_p_7")
+							 ,document.getElementById("l_p_8")
+							 ,document.getElementById("d_r_1")
+							 ,document.getElementById("d_n_1")
+							 ,document.getElementById("d_b_1")
+							 ,document.getElementById("d_q")
+							 ,document.getElementById("d_k")
+							 ,document.getElementById("d_b_2")
+							 ,document.getElementById("d_n_2")
+							 ,document.getElementById("d_r_2")
+							 ,document.getElementById("d_p_1")
+							 ,document.getElementById("d_p_2")
+							 ,document.getElementById("d_p_3")
+							 ,document.getElementById("d_p_4")
+							 ,document.getElementById("d_p_5")
+							 ,document.getElementById("d_p_6")
+							 ,document.getElementById("d_p_7")
+							 ,document.getElementById("d_p_8")];
+
+			for (var i=1; i<9; i++)
+			{
+				//console.log(document.getElementById("board").children[0].children[0].children[i].id);
+
+				var temp_arr = [];
+
+				for (var j=1; j<9; j++)
+				{
+					//console.log(document.getElementById("board").children[0].children[0].children[i].children[j]);
+
+					if (document.getElementById("board").children[0].children[0].children[i].children[j].classList.contains("td_light") 
+						|| document.getElementById("board").children[0].children[0].children[i].children[j].classList.contains("td_dark"))
+					{
+						if (j > 0 && j < 9 && i == 8)
+						{
+							//console.log("i="+i+",(j-1)="+(j-1)+" and pushing "+pieces_arr[(j-1)].id);
+							temp_arr.push(new boardCell(pieces_arr[(j-1)], document.getElementById("board").children[0].children[0].children[i].children[j]));
+						}
+						else if (j > 0 && j < 9 && i == 7)
+						{
+							//console.log("i="+i+",(j-1)="+(j-1)+" and pushing "+pieces_arr[(j-1) + 8].id);
+							temp_arr.push(new boardCell(pieces_arr[(j-1) + 8], document.getElementById("board").children[0].children[0].children[i].children[j]));
+						}
+						else if (j > 0 && j < 9 && i == 1)
+						{
+							//console.log("i="+i+",(j-1)="+(j-1)+" and pushing "+pieces_arr[(j-1) + 16].id);
+							temp_arr.push(new boardCell(pieces_arr[(j-1) + 16], document.getElementById("board").children[0].children[0].children[i].children[j]));
+						}
+						else if (j > 0 && j < 9 && i == 2)
+						{
+							//console.log("i="+i+",(j-1)="+(j-1)+" and pushing "+pieces_arr[(j-1) + 24].id);
+							temp_arr.push(new boardCell(pieces_arr[(j-1) + 24], document.getElementById("board").children[0].children[0].children[i].children[j]));
+						}
+						else
+						{
+							//console.log("i="+i+",(j-1)="+(j-1)+" and pushing null");
+							temp_arr.push(new boardCell(null, document.getElementById("board").children[0].children[0].children[i].children[j]));
+						}
+
+						document.getElementById("board").children[0].children[0].children[i].children[j].addEventListener("click", function() 
+						{
+							onCellClick(this.id);
+						});
+					}
+				}
+
+				board_arr.push(temp_arr);
+			}
+
+			onResizing();
+		};
+
+		async function start()
+		{
+			document.getElementById("btn").style.height = 0;
+			document.getElementById("btn").style.opacity = 0;
+
+
+			var min_length = window.innerHeight < window.innerWidth ? window.innerHeight : window.innerWidth;
+			min_length = min_length - 16;
+
+			var left_over_width = window.innerWidth - 32 - min_length;
+
+			var chess_cel_length = min_length / 8.8;
+			var label_cel_length = (min_length - (chess_cel_length * 8)) / 2;
+
+
+			var length = openings_list.length;
+
+			for (var i=0; i<1; i++)
+			{
+				var index = Math.floor(Math.random() * (openings_list.length-1));
+
+				var temp_arr = openings_list[index];
+
+				if (temp_arr[0] == "dark")
+					flipBoardToDark();
+
+				var player_input = false;
+
+				for (var j=1; j<temp_arr.length; j++)
+				{
+					console.log("j = "+j+": "+temp_arr[j]);
+
+					if (temp_arr[j] != "start")
+						document.getElementById("openings_text").innerHTML = document.getElementById("openings_text").innerHTML + " " + temp_arr[j];
+
+					if (!player_input && temp_arr[j+4] == "start")
+					{
+						document.getElementById("countdown_div").style.display = "flex";
+						document.getElementById("countdown_div_div").style.fontSize = 250;
+						document.getElementById("countdown_text").innerHTML = "3";
+					}
+
+					if (!player_input && temp_arr[j+3] == "start")
+						document.getElementById("countdown_text").innerHTML = "2";
+
+					if (!player_input && temp_arr[j+2] == "start")
+						document.getElementById("countdown_text").innerHTML = "1";
+
+					if (!player_input && temp_arr[j+1] == "start")
+					{
+						document.getElementById("countdown_div_div").style.fontSize = 100;
+						document.getElementById("countdown_text").innerHTML = "YOUR TURN!";
+					}
+
+					if (temp_arr[j] == "start")
+					{
+						document.getElementById("countdown_div").style.display = "none";
+						player_input = true;
+						break;
+					}
+
+					if (temp_arr[j].length == 2)
+					{
+						var index_1 = getRowIndex(temp_arr[j]);
+						var index_2 = getColIndex(temp_arr[j]);
+
+						var cell_selected = null;
+
+						if (j % 2 == 1) // Odd, light move
+						{
+							for (var k=7; k>0; k--)
+							{
+								//if (board_arr[k][index_2].piece != null) 
+								//	console.log("checking k="+k+" and piece = "+board_arr[k][index_2].piece.id);
+
+								if (board_arr[k][index_2].piece != null && board_arr[k][index_2].piece.id.substring(0, 3) == "l_p")
+								{
+									//console.log("found");
+									cell_selected = board_arr[k][index_2];
+									break;
+								}
+							}
+						}
+						else // Even, dark move
+						{
+							for (var k=0; k<7; k++)
+							{
+								//if (board_arr[k][index_2].piece != null) 
+								//	console.log("checking k="+k+" and piece = "+board_arr[k][index_2].piece.id);
+
+								if (board_arr[k][index_2].piece != null && board_arr[k][index_2].piece.id.substring(0, 3) == "d_p")
+								{
+									//console.log("found");
+									cell_selected = board_arr[k][index_2];
+									break;
+								}
+							}
+						}
+
+						//console.log("selected "+cell_selected.piece.id);
+
+						if (board_arr[index_1][index_2].piece != null)
+						{
+							//console.log("made "+board_arr[index_1][index_2].piece.id+" disappear");
+							board_arr[index_1][index_2].piece.style.opacity = 0;
+						}
+
+						setPieceCell(cell_selected.piece, cell_selected.elem.id, board_arr[index_1][index_2].elem.id, left_over_width, chess_cel_length, label_cel_length);
+
+						//console.log("cleared old cell "+cell_selected.elem.id);
+						var index_1_old = getRowIndex(cell_selected.elem.id);
+						var index_2_old = getColIndex(cell_selected.elem.id);
+
+						//console.log("old indexes = "+index_1_old+","+index_2_old);
+
+						board_arr[index_1_old][index_2_old].piece = null;
+
+						console.log("moved "+board_arr[index_1][index_2].piece.id+" to "+board_arr[index_1][index_2].elem.id);
+					}
+
+					if (!player_input)
+						await new Promise(r => setTimeout(r, 1000));
+					else if ((temp_arr[0] == "light" && j % 2 == 0) || (temp_arr[0] == "dark" && j % 2 == 1))
+						await new Promise(r => setTimeout(r, 200));
+				}
+
+				openings_list.splice(index, 1);
+
+				document.getElementById("openings_text").innerHTML = document.getElementById("openings_text").innerHTML + "<br><br>";
+
+				// reset
+			}
+		}
+
+		window.onresize = onResizing;
+		window.onload = onLoad;
+	</script>
+
+	<head>
+		<title>Chess Openings</title>
+	</head>
+
+	<body style="background-color:black; font-family:Courier New, monospace;">
+		<div id="left_inner" style="background-color: #1e1e1e; position: absolute;">
+			<div id="left_text" style="background-color: #1e1e1e; position: absolute; padding: 20; top: 15; color: lightgray; text-align: center;">
+				<div style="font-size: 34;">
+					<b>Chess Openings Practice</b>
+				</div>
+				<br>
+				<button id="btn" onclick="start()">
+					START
+				</button>
+				<div id="openings_text" style="font-size: 20;">
+					
+				</div>
+			</div>
+		</div>
+		<div id="right_inner" style="background-color: #1e1e1e; position: absolute;">
+			<div id="right_text" style="background-color: #1e1e1e; position: absolute; padding: 20; top: 15; color: lightgray; text-align: center;">
+				<div style="font-size: 40;">
+					<b>Score:</b>
+				</div>
+				<div style="font-size: 15;">
+					(weighted 80% accuracy + 20% avg turn time <= 1 sec)
+				</div>
+				<br>
+				<br>
+				<div id="score" style="font-size: 30;">
+					
+				</div>
+			</div>
+		</div>
+		<div id="board" style="background-color: #1e1e1e; position: absolute;">
+			<table id="table">
+				<tr id="row1">
+					<td class="tbl_label_corner"></td>
+					<td class="tbl_label_row"></td>
+					<td class="tbl_label_row"></td>
+					<td class="tbl_label_row"></td>
+					<td class="tbl_label_row"></td>
+					<td class="tbl_label_row"></td>
+					<td class="tbl_label_row"></td>
+					<td class="tbl_label_row"></td>
+					<td class="tbl_label_row"></td>
+					<td class="tbl_label_corner"></td>
+				</tr>
+				<tr id="row2">
+					<td class="tbl_label_col"><b>8</b></td>
+					<td class="td_light" id="a8"></td>
+					<td class="td_dark" id="b8"></td>
+					<td class="td_light" id="c8"></td>
+					<td class="td_dark" id="d8"></td>
+					<td class="td_light" id="e8"></td>
+					<td class="td_dark" id="f8"></td>
+					<td class="td_light" id="g8"></td>
+					<td class="td_dark" id="h8"></td>
+					<td class="tbl_label_col"></td>
+				</tr>
+				<tr id="row3">
+					<td class="tbl_label_col"><b>7</b></td>
+					<td class="td_dark" id="a7"></td>
+					<td class="td_light" id="b7"></td>
+					<td class="td_dark" id="c7"></td>
+					<td class="td_light" id="d7"></td>
+					<td class="td_dark" id="e7"></td>
+					<td class="td_light" id="f7"></td>
+					<td class="td_dark" id="g7"></td>
+					<td class="td_light" id="h7"></td>
+					<td class="tbl_label_col"></td>
+				</tr>
+				<tr id="row4">
+					<td class="tbl_label_col"><b>6</b></td>
+					<td class="td_light" id="a6"></td>
+					<td class="td_dark" id="b6"></td>
+					<td class="td_light" id="c6"></td>
+					<td class="td_dark" id="d6"></td>
+					<td class="td_light" id="e6"></td>
+					<td class="td_dark" id="f6"></td>
+					<td class="td_light" id="g6"></td>
+					<td class="td_dark" id="h6"></td>
+					<td class="tbl_label_col"></td>
+				</tr>
+				<tr id="row5">
+					<td class="tbl_label_col"><b>5</b></td>
+					<td class="td_dark" id="a5"></td>
+					<td class="td_light" id="b5"></td>
+					<td class="td_dark" id="c5"></td>
+					<td class="td_light" id="d5"></td>
+					<td class="td_dark" id="e5"></td>
+					<td class="td_light" id="f5"></td>
+					<td class="td_dark" id="g5"></td>
+					<td class="td_light" id="h5"></td>
+					<td class="tbl_label_col"></td>
+				</tr>
+				<tr id="row6">
+					<td class="tbl_label_col"><b>4</b></td>
+					<td class="td_light" id="a4"></td>
+					<td class="td_dark" id="b4"></td>
+					<td class="td_light" id="c4"></td>
+					<td class="td_dark" id="d4"></td>
+					<td class="td_light" id="e4"></td>
+					<td class="td_dark" id="f4"></td>
+					<td class="td_light" id="g4"></td>
+					<td class="td_dark" id="h4"></td>
+					<td class="tbl_label_col"></td>
+				</tr>
+				<tr id="row7">
+					<td class="tbl_label_col"><b>3</b></td>
+					<td class="td_dark" id="a3"></td>
+					<td class="td_light" id="b3"></td>
+					<td class="td_dark" id="c3"></td>
+					<td class="td_light" id="d3"></td>
+					<td class="td_dark" id="e3"></td>
+					<td class="td_light" id="f3"></td>
+					<td class="td_dark" id="g3"></td>
+					<td class="td_light" id="h3"></td>
+					<td class="tbl_label_col"></td>
+				</tr>
+				<tr id="row8">
+					<td class="tbl_label_col"><b>2</b></td>
+					<td class="td_light" id="a2"></td>
+					<td class="td_dark" id="b2"></td>
+					<td class="td_light" id="c2"></td>
+					<td class="td_dark" id="d2"></td>
+					<td class="td_light" id="e2"></td>
+					<td class="td_dark" id="f2"></td>
+					<td class="td_light" id="g2"></td>
+					<td class="td_dark" id="h2"></td>
+					<td class="tbl_label_col"></td>
+				</tr>
+				<tr id="row9">
+					<td class="tbl_label_col"><b>1</b></td>
+					<td class="td_dark" id="a1"></td>
+					<td class="td_light" id="b1"></td>
+					<td class="td_dark" id="c1"></td>
+					<td class="td_light" id="d1"></td>
+					<td class="td_dark" id="e1"></td>
+					<td class="td_light" id="f1"></td>
+					<td class="td_dark" id="g1"></td>
+					<td class="td_light" id="h1"></td>
+					<td class="tbl_label_col"></td>
+				</tr>
+				<tr id="row10">
+					<td class="tbl_label_corner"></td>
+					<td class="tbl_label_row"><b>A</b></td>
+					<td class="tbl_label_row"><b>B</b></td>
+					<td class="tbl_label_row"><b>C</b></td>
+					<td class="tbl_label_row"><b>D</b></td>
+					<td class="tbl_label_row"><b>E</b></td>
+					<td class="tbl_label_row"><b>F</b></td>
+					<td class="tbl_label_row"><b>G</b></td>
+					<td class="tbl_label_row"><b>H</b></td>
+					<td class="tbl_label_corner"></td>
+				</tr>
+			</table>
+		</div>
+
+		<img src="light_rook.png" id="l_r_1" style="position: absolute; pointer-events: none;">
+		<img src="light_knight.png" id="l_n_1" style="position: absolute; pointer-events: none;">
+		<img src="light_bishop.png" id="l_b_1" style="position: absolute; pointer-events: none;">
+		<img src="light_queen.png" id="l_q" style="position: absolute; pointer-events: none;">
+		<img src="light_king.png" id="l_k" style="position: absolute; pointer-events: none;">
+		<img src="light_bishop.png" id="l_b_2" style="position: absolute; pointer-events: none;">
+		<img src="light_knight.png" id="l_n_2" style="position: absolute; pointer-events: none;">
+		<img src="light_rook.png" id="l_r_2" style="position: absolute; pointer-events: none;">
+		<img src="light_pawn.png" id="l_p_1" style="position: absolute; pointer-events: none;">
+		<img src="light_pawn.png" id="l_p_2" style="position: absolute; pointer-events: none;">
+		<img src="light_pawn.png" id="l_p_3" style="position: absolute; pointer-events: none;">
+		<img src="light_pawn.png" id="l_p_4" style="position: absolute; pointer-events: none;">
+		<img src="light_pawn.png" id="l_p_5" style="position: absolute; pointer-events: none;">
+		<img src="light_pawn.png" id="l_p_6" style="position: absolute; pointer-events: none;">
+		<img src="light_pawn.png" id="l_p_7" style="position: absolute; pointer-events: none;">
+		<img src="light_pawn.png" id="l_p_8" style="position: absolute; pointer-events: none;">
+		<img src="dark_rook.png" id="d_r_1" style="position: absolute; pointer-events: none;">
+		<img src="dark_knight.png" id="d_n_1" style="position: absolute; pointer-events: none;">
+		<img src="dark_bishop.png" id="d_b_1" style="position: absolute; pointer-events: none;">
+		<img src="dark_queen.png" id="d_q" style="position: absolute; pointer-events: none;">
+		<img src="dark_king.png" id="d_k" style="position: absolute; pointer-events: none;">
+		<img src="dark_bishop.png" id="d_b_2" style="position: absolute; pointer-events: none;">
+		<img src="dark_knight.png" id="d_n_2" style="position: absolute; pointer-events: none;">
+		<img src="dark_rook.png" id="d_r_2" style="position: absolute; pointer-events: none;">
+		<img src="dark_pawn.png" id="d_p_1" style="position: absolute; pointer-events: none;">
+		<img src="dark_pawn.png" id="d_p_2" style="position: absolute; pointer-events: none;">
+		<img src="dark_pawn.png" id="d_p_3" style="position: absolute; pointer-events: none;">
+		<img src="dark_pawn.png" id="d_p_4" style="position: absolute; pointer-events: none;">
+		<img src="dark_pawn.png" id="d_p_5" style="position: absolute; pointer-events: none;">
+		<img src="dark_pawn.png" id="d_p_6" style="position: absolute; pointer-events: none;">
+		<img src="dark_pawn.png" id="d_p_7" style="position: absolute; pointer-events: none;">
+		<img src="dark_pawn.png" id="d_p_8" style="position: absolute; pointer-events: none;">
+
+		<div id="countdown_div" class="modal" style="display: none; pointer-events: none;">
+			<div id="countdown_div_div" class="modal-content" style="height: 300px; width: 500px; text-align: center; font-size: 250; pointer-events: none;">
+				<b id="countdown_text" style="pointer-events: none;">3</b>
+			</div>
+		</div>
+	</body>
+</html>
