@@ -211,7 +211,18 @@
 							,["light", "e2-e4", "e7-e5", "g1-f3", "b8-c6", "f1-c4", "f8-c5", "start", "b1-c3", "g8-f6", "d2-d3", "O-O", "c1-g5", "d7-d6", "d1-d2", "h7-h6", "g5-h4", "g7-g5", "f3-g5", "h6-g5", "d2-g5", "Giuoco Piano Game: Giuoco Pianissimo, Italian Four Knights Variation"]
 							,["light", "e2-e4", "e7-e5", "g1-f3", "b8-c6", "f1-c4", "f8-c5", "start", "b1-c3", "g8-f6", "d2-d3", "O-O", "c1-g5", "d7-d6", "d1-d2", "h7-h6", "g5-h4", "c5-b4", "a2-a3", "b4-c3", "b2-c3", "Giuoco Piano Game: Giuoco Pianissimo, Italian Four Knights Variation"]
 							/////// HERE ends WHITE BISHOP QUEEN GAMBIT TOWARD BLACK O-O
-							];
+							,["light", "e2-e4", "e7-e5", "g1-f3", "b8-c6", "f1-c4", "g8-f6", "f3-g5", "f6-e4", "start", "c4-f7", "e8-e7", "d2-d4", "h7-h6", "g5-e4", "e7-f7", "d4-d5", "c6-d4", "c2-c3", "d8-h4", "e4-g3", "d4-b5", "O-O", "Italian Game: Knight Attack, Ponziani-Steinitz Gambit"]
+							,["light", "e2-e4", "e7-e5", "g1-f3", "b8-c6", "f1-c4", "g8-f6", "f3-g5", "f6-e4", "start", "c4-f7", "e8-e7", "d2-d4", "c6-d4", "c2-c3", "d4-c6", "f7-b3", "Italian Game: Knight Attack, Ponziani-Steinitz Gambit"]
+							,["light", "e2-e4", "e7-e5", "g1-f3", "b8-c6", "f1-c4", "g8-f6", "f3-g5", "f6-e4", "start", "c4-f7", "e8-e7", "d2-d4", "c6-d4", "c2-c3", "h7-h6", "g5-e4", "e7-f7", "c3-d4", "e5-d4", "d1-d4", "d7-d5", "O-O", "Italian Game: Knight Attack, Ponziani-Steinitz Gambit"]
+							,["dark", "e2-e4", "e7-e5", "g1-f3", "b8-c6", "d2-d4", "start", "e5-d4", "f3-d4", "g8-f6", "d4-c6", "b7-c6", "e4-e5", "d8-e7", "d1-e2", "f6-d5", "c2-c4", "d5-b6", "Scotch Game: Schmidt, Mieses Variation"]
+							,["dark", "e2-e4", "e7-e5", "g1-f3", "b8-c6", "d2-d4", "start", "e5-d4", "f1-c4", "f8-c5", "c2-c3", "g8-f6", "c3-d4", "c5-b4", "Giuoco Piano Game: Center Attack"]
+							,["dark", "e2-e4", "e7-e5", "g1-f3", "b8-c6", "d2-d4", "start", "e5-d4", "f1-c4", "f8-c5", "c2-c3", "g8-f6", "e4-e5", "d7-d5", "Giuoco Piano Game: Center Attack"]
+							,["dark", "e2-e4", "e7-e5", "g1-f3", "b8-c6", "d2-d4", "start", "e5-d4", "f1-c4", "f8-c5", "f3-g5", "g8-h6", "O-O", "c6-e5", "Scotch Game: Scotch Gambit, Haxo, Sarratt Variation"]
+							,["dark", "e2-e4", "e7-e5", "g1-f3", "b8-c6", "d2-d4", "start", "e5-d4", "c2-c3", "d4-c3", "Scotch Game: Göring Gambit"]
+							,["light", "e2-e4", "c7-c6", "g1-f3", "d7-d5", "start", "b1-c3", "d5-e4", "c3-e4", "c8-f5", "e4-g3", "f5-g6", "h2-h4", "Caro-Kann Defense: Two Knights Attack"]
+							,["light", "e2-e4", "c7-c6", "g1-f3", "d7-d5", "start", "b1-c3", "d5-e4", "c3-e4", "c8-f5", "e4-g3", "f5-g4", "f1-c4", "e7-e6", "O-O", "Caro-Kann Defense: Two Knights Attack"]
+							,["light", "e2-e4", "c7-c6", "g1-f3", "d7-d5", "start", "b1-c3", "c8-g4", "h2-h3", "g4-f3", "d1-f3", "g8-f6", "d2-d3", "d5-d4", "c3-b1", "Caro-Kann Defense: Two Knights, Mindeno, Exchange Line"]
+							,["light", "e2-e4", "c7-c6", "g1-f3", "d7-d5", "start", "b1-c3", "c8-g4", "h2-h3", "g4-h5", "e4-d5", "c6-d5", "g2-g4", "h5-g6", "f3-e5", "b8-c6", "d2-d4", "f7-f6", "e5-g6", "Caro-Kann Defense: Two Knights, Mindeno, Retreat Line"]];
 		var accuracy_score = 0;
 		var max_pos_acc_score = 0;
 		var time_score = 0;
@@ -1730,16 +1741,24 @@
 						else if (temp < 0)
 							temp = 0;
 
+						//document.getElementById("score").innerHTML 
+						//	= Math.round(((accuracy_score / max_pos_acc_score) * 80)
+						//		+ (temp * 20)) + "%";
+
+						//document.getElementById("score_desc_1").innerHTML
+						//	= accuracy_score+"/"+max_pos_acc_score+" accuracy = "
+						//		+Math.round(((accuracy_score / max_pos_acc_score) * 80))+"% + "
+						//document.getElementById("score_desc_2").innerHTML
+						//	= (Math.round((time_score / (max_pos_acc_score * 1000)) * 10) / 10)+" sec avg time = "
+						//		+Math.round(temp * 20)+"%";
+
 						document.getElementById("score").innerHTML 
-							= Math.round(((accuracy_score / max_pos_acc_score) * 80)
-								+ (temp * 20)) + "%";
+							= Math.round(((accuracy_score / max_pos_acc_score) * 100)) + "%";
 
 						document.getElementById("score_desc_1").innerHTML
-							= accuracy_score+"/"+max_pos_acc_score+" accuracy = "
-								+Math.round(((accuracy_score / max_pos_acc_score) * 80))+"% + "
+							= accuracy_score+"/"+max_pos_acc_score+" accuracy";
 						document.getElementById("score_desc_2").innerHTML
-							= (Math.round((time_score / (max_pos_acc_score * 1000)) * 10) / 10)+" sec avg time = "
-								+Math.round(temp * 20)+"%";
+							= (Math.round((time_score / (max_pos_acc_score * 1000)) * 10) / 10)+" sec avg time";
 					}
 
 					if (temp_arr[j] != "start")
@@ -1959,11 +1978,10 @@
 					<b>Score:</b>
 				</div>
 				<div style="font-size: 15;">
-					(weighted 80% accuracy + 20% avg turn time <= 1 sec)
+					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 				</div>
 				<br>
-				<br>
-				<b><div id="score" style="font-size: 35;">
+				<b><div id="score" style="font-size: 38;">
 					
 				</div></b>
 				<div id="score_desc_1" style="font-size: 15;">
@@ -1975,7 +1993,7 @@
 				<br>
 				<br>
 				<div id="countdown_div" style="color: red; display: none; pointer-events: none;">
-					<div id="countdown_div_div" style="text-align: center; font-size: 200; pointer-events: none;">
+					<div id="countdown_div_div" style="text-align: center; font-size: 150; pointer-events: none;">
 						<b id="countdown_text" style="pointer-events: none;">3</b>
 					</div>
 				</div>
