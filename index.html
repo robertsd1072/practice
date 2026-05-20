@@ -236,7 +236,12 @@
 							,["dark", "e2-e4", "e7-e5", "d2-d4", "start", "e5-d4", "c2-c3", "d4-c3", "f1-c4", "c3-b2", "c1-b2", "g8-f6", "e4-e5", "f8-b4", "b2-c3", "d8-e7", "d1-e2", "f6-g8", "g1-f3", "g8-h6", "Danish Gambit Accepted: Classical Defense"]
 							,["light", "e2-e4", "d7-d5", "start", "e4-d5", "c7-c6", "d5-c6", "b8-c6", "g1-f3", "g8-f6", "f1-c4", "e7-e6", "d2-d3", "f8-c5", "c1-f4", "d8-b6", "O-O", "b6-b2", "b1-d2", "Scandinavian Defense: Blackburne-Kloosterboer Gambit"]
 							,["dark", "e2-e4", "start", "try", "d7-d5", "try", "e4-d5", "d8-d5", "b1-c3", "d5-a5", "a2-a3", "e7-e6", "b2-b4", "f8-b4", "Scandinavian Defense: Mieses-Kotrč, Main Line"]
-							,["dark", "d2-d4", "d7-d5", "c2-c4", "start", "g8-f6", "b1-c3", "g7-g6", "c4-d5", "f6-d5", "e2-e4", "d5-c3", "b2-c3", "f8-g7", "f1-c4", "c7-c5", "g1-e2", "O-O", "d4-c5", "b8-d7", "Grünfeld Defense: Exchange, Classical Variation"]];
+							,["dark", "d2-d4", "d7-d5", "c2-c4", "start", "g8-f6", "b1-c3", "g7-g6", "c4-d5", "f6-d5", "e2-e4", "d5-c3", "b2-c3", "f8-g7", "f1-c4", "c7-c5", "g1-e2", "O-O", "d4-c5", "b8-d7", "Grünfeld Defense: Exchange, Classical Variation"]
+							,["light", "e2-e4", "e7-e6", "start", "try", "d2-d4", "try", "d7-d5", "b1-c3", "d5-e4", "c3-e4", "b8-d7", "g1-f3", "g8-f6", "e4-f6", "d7-f6", "c2-c3", "French Defense: Rubinstein, Blackburne, Kasparov Attack"]
+							,["light", "e2-e4", "e7-e6", "start", "try", "g1-f3", "try", "b7-b6", "d2-d4", "c8-b7", "f1-d3", "c7-c5", "c2-c3", "g8-f6", "d1-e2", "d7-d6", "O-O", "Owen's Defense"]
+							,["light", "e2-e4", "e7-e6", "start", "try", "g1-f3", "try", "b7-b6", "d2-d4", "c8-b7", "f1-d3", "d7-d5", "e4-d5", "d8-d5", "c2-c4", "d5-d8", "b1-c3", "Owen's Defense"]
+							,["dark", "e2-e4", "e7-e5", "d2-d4", "start", "e5-d4", "g1-f3", "f8-c5", "f3-g5", "g8-f6", "f1-c4", "O-O", "e4-e5", "d7-d5", "c4-d3", "f6-e4", "d1-h5", "c8-f5", "g5-e4", "d5-e4", "Center Game Accepted: Kieseritzky Variation"]
+							,["dark", "e2-e4", "e7-e5", "d2-d4", "start", "e5-d4", "g1-f3", "f8-c5", "f3-g5", "g8-f6", "g5-f7", "e8-f7", "f1-c4", "d7-d5", "e4-d5", "h8-e8", "Center Game Accepted: Kieseritzky Variation"]];
 		var accuracy_score = 0;
 		var max_pos_acc_score = 0;
 		var time_score = 0;
@@ -1942,6 +1947,8 @@
 			document.getElementById("countdown_div").style.display = "block";
 			document.getElementById("countdown_div_div").style.fontSize = 30;
 			document.getElementById("countdown_text").innerHTML = "done";
+
+			document.getElementById("restart_btn").style.display = "inline";
 		}
 
 		function pause(event)
@@ -2017,6 +2024,26 @@
 			document.getElementById("next_btn").style.display = "none";
 		}
 
+		function restart(event)
+		{
+			document.getElementById("restart_btn").style.display = "none";
+
+			document.getElementById("countdown_div").style.display = "none";
+
+			document.getElementById("openings_text").innerHTML = "";
+			document.getElementById("openings_text").style.display = "none";
+
+			onLoad();
+
+			document.getElementById("btn").style.height = 80;
+			document.getElementById("btn").style.opacity = 1;
+
+			document.getElementById("btn_new").style.height = 80;
+			document.getElementById("btn_new").style.opacity = 1;
+
+
+		}
+
 		document.addEventListener('keyup', pause);
 
 		window.onresize = onResizing;
@@ -2042,8 +2069,8 @@
 				</button>
 				<br>
 				<br>
-				<button id="btn_new" style="width: 320;" onclick="start_new()">
-					START NEW OPENINGS
+				<button id="btn_new" style="width: 200;" onclick="start_new()">
+					START NEW
 				</button>
 			</div>
 		</div>
@@ -2097,6 +2124,11 @@
 				<div>
 					<button id="solution_btn" onclick="solution()" style="display: none; width: 210">
 						SOLUTION
+					</button>
+				</div>
+				<div>
+					<button id="restart_btn" onclick="restart()" style="display: none; width: 200">
+						RESTART
 					</button>
 				</div>
 			</div>
